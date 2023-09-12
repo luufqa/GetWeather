@@ -1,120 +1,88 @@
-import requests
 import datetime
+import requests
 
 # url api с параметрами
 urlWeather = "https://api.open-meteo.com/v1/forecast?"
 urlGeocoding = "https://geocoding-api.open-meteo.com/v1/search?name="
 
-yesSeriesDays = 1
+yesSeriesDays = 0
 startDate = datetime.date.today()
 endDate = startDate
+lat = 0
+lon = 0
+dataTemp = 0
+tempCity = 0
+pastDay = 0
 
-while True:
-    # точка входа
-    what = input("""\nВыберите вариант:
-    Найти координаты вашего города? Введите 1
-    Найти погоду по координатам города? Введите 2
-    Найти погоду по названию города? Введите 3
-    Найти погоду за вчера, указав город? Введите 4
-    Найти когда восход и заход солнца в городе? Введите 5
-    Выйти из программы? Введите 0""")
+def stAndDat():
+    chooseDay = input("Today or Other?")
+    if chooseDay == "Today":
+        pass
+    else:
+        global startDate, endDate
+        startDate = input("Enter date: YYYY-MM-DD")
+        endDate = startDate
+    return startDate, endDate
+def sunsetSunrise(suns, sunr):
+    for a in suns:
+        print(f"Sunset in you city in - {a[-5:]}")
+    for b in sunr:
+        print(f"Sunrise in you city in - {b[-5:]}")
+    return a, b
+def get_cityName():
+    city = input("city?")
+    return city
+def get_coords_by_yourCity(youCity):
+    Geocoding = requests.get(urlGeocoding+youCity).json()
+    global lat, lon
+    lat = Geocoding["results"][0]["latitude"]
+    lon = Geocoding["results"][0]["longitude"]
+    return lat, lon
+def get_weather_by_coords(lat, lon, yesSeriesDays=0, pastDay=0):
 
-    if what == "1":
-        city = input("Введите город на англ., Пример: Moscow, Berlin")
-            # url api с параметрами
-        resUrlGeocoding = urlGeocoding+city
-            # запрашиваем ответ в JSON
-        Geocoding = requests.get(resUrlGeocoding).json()
-            # из JSON получаем Широту и Долготу
-        valueLatitude = Geocoding["results"][0]["latitude"]
-        valueLongitude = Geocoding["results"][0]["longitude"]
-        print("\nКоординаты вашего города\n", "Широта: ", valueLatitude, "\nДолгота: ", valueLongitude)
+    weatherYourCity = urlWeather + f"latitude={lat}" + "&" + f"longitude={lon}" + "&hourly=temperature_2m" + f"&forecast_days={yesSeriesDays}" + f"&past_days={pastDay}"
+    reqWeatherYourCity = requests.get(weatherYourCity).json()
+    # из JSON получаем Дату и Температуру
+    global dataTemp, tempCity
+    dataTemp = reqWeatherYourCity["hourly"]["time"]
+    tempCity = reqWeatherYourCity["hourly"]["temperature_2m"]
 
-    if what == "2":
-        valueLatitude = input("Введите широту: ")
-        valueLongitude = input("Введите долготу: ")
-        yesSeriesDays = input("\nЗа сколько дней вывести погоду? Введите от 1 до 16")
-        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + f"&forecast_days={yesSeriesDays}"
-        reqWeatherYourCity = requests.get(weatherYourCity).json()
-        # из JSON получаем Дату и Температуру
-        dataYourCity = reqWeatherYourCity["hourly"]["time"]
-        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
-        # формируем красивый вывод погоды на сегодня
-        compilationDataTemp = []
-        for d, t in zip(dataYourCity, tempYourCity):
-            res = (str(d) + " - " + str(t) + " °C")
-            compilationDataTemp.append(res)
-        print("\nПогода по заданным координатам:\n", *compilationDataTemp, sep="\n")
 
-    if what == "3":
-        city = input("Введите город на англ., Пример: Moscow, Berlin")
-        # url api с параметрами
-        resUrlGeocoding = urlGeocoding + city
-        # запрашиваем ответ в JSON
-        Geocoding = requests.get(resUrlGeocoding).json()
-        # из JSON получаем Широту и Долготу
-        valueLatitude = Geocoding["results"][0]["latitude"]
-        valueLongitude = Geocoding["results"][0]["longitude"]
-        yesSeriesDays = input("\nЗа сколько дней вывести погоду? Введите от 1 до 16")
-        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + f"&forecast_days={yesSeriesDays}"
-        reqWeatherYourCity = requests.get(weatherYourCity).json()
-        # из JSON получаем Дату и Температуру
-        dataYourCity = reqWeatherYourCity["hourly"]["time"]
-        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
-        # формируем красивый вывод погоды на сегодня
-        compilationDataTemp = []
-        for d, t in zip(dataYourCity, tempYourCity):
-            res = (str(d) + " - " + str(t) + " °C")
-            compilationDataTemp.append(res)
-        print("\nПогода в вашем городе:\n", *compilationDataTemp, sep="\n")
 
-    if what == "4":
-        city = input("Введите город на англ., Пример: Moscow, Berlin")
-        # url api с параметрами
-        resUrlGeocoding = urlGeocoding + city
-        # запрашиваем ответ в JSON
-        Geocoding = requests.get(resUrlGeocoding).json()
-        # из JSON получаем Широту и Долготу
-        valueLatitude = Geocoding["results"][0]["latitude"]
-        valueLongitude = Geocoding["results"][0]["longitude"]
+    # формируем красивый вывод погоды на сегодня
+    compilationDataTemp = []
+    for d, t in zip(dataTemp, tempCity):
+        res = (str(d) + " - " + str(t) + " °C")
+        compilationDataTemp.append(res)
+    return compilationDataTemp
 
-        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + "&past_days=1" + "&forecast_days=0"
-        reqWeatherYourCity = requests.get(weatherYourCity).json()
-        print(reqWeatherYourCity)
-        # из JSON получаем Дату и Температуру
-        dataYourCity = reqWeatherYourCity["hourly"]["time"]
-        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
-        # формируем красивый вывод погоды на сегодня
-        compilationDataTemp = []
-        for d, t in zip(dataYourCity, tempYourCity):
-            res = (str(d) + " - " + str(t) + " °C")
-            compilationDataTemp.append(res)
-        print("\nВчера было :\n", *compilationDataTemp, sep="\n")
+def last(lat, lon, yesSeriesDays=0):
+    stAndDat()
+    weatherYourCity = urlWeather + f"latitude={lat}" + "&" + f"longitude={lon}" + f"&forecast_days={yesSeriesDays}" + f"&daily=sunset,sunrise" + f"&timezone=auto" + f"&start_date={startDate}" + f"&end_date={endDate}"
+    reqWeatherYourCity = requests.get(weatherYourCity).json()
 
-    if what == "5":
-        city = input("Введите город на англ., Пример: Moscow, Berlin")
-        chooseDay = input("На сегодня узнать или на другую дату? Введите Сегодня или Другая")
-        if chooseDay == "Сегодня":
-            pass
-        else:
-            startDate = input("Укажите желаемую дату. Введите в формете YYYY-MM-DD")
-            endDate = startDate
-        # url api с параметрами
-        resUrlGeocoding = urlGeocoding + city
-        # запрашиваем ответ в JSON
-        Geocoding = requests.get(resUrlGeocoding).json()
-        # из JSON получаем Широту и Долготу
-        valueLatitude = Geocoding["results"][0]["latitude"]
-        valueLongitude = Geocoding["results"][0]["longitude"]
-        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&daily=sunset,sunrise" + "&forecast_days=0" +"&timezone=auto" + f"&start_date={startDate}" + f"&end_date={endDate}"
-        reqWeatherYourCity = requests.get(weatherYourCity).json()
-        valueSunset = reqWeatherYourCity["daily"]["sunset"]
-        valueSunrise = reqWeatherYourCity["daily"]["sunrise"]
+    # из JSON получаем Дату и Температуру
+    global suns, sunr
+    suns = reqWeatherYourCity["daily"]["sunset"]
+    sunr = reqWeatherYourCity["daily"]["sunrise"]
+    sunsetSunrise(suns, sunr)
 
-        for a in valueSunset:
-            print(f"Заход в вашем городе, в это время - {a[-4:]}")
-        for b in valueSunrise:
-            print(f"Восход в вашем городе, в это время - {b[-4:]}")
+def get_weather_by_cityName(coords, weather):
+    return coords, weather
+def get_weatherPastday_by_cityName(coords, weather):
+    return coords, weather
+def get_sunsetSunrise_by_city(coords, sunsetAndSunrise):
+    return coords, sunsetAndSunrise
 
-    if what == "0":
-        break
+
+
+
+
+#print(get_cityName())
+#print(get_coords_by_yourCity(get_cityName()))
+#print(get_weather_by_coords(lat, lon, yesSeriesDays=input("how much days? since 1 for 16")))
+#print(get_weather_by_cityName(get_coords_by_yourCity(get_cityName()),get_weather_by_coords(lat, lon, yesSeriesDays=input('how much days? since 1 for 16'))))
+#print(get_weather_by_cityName(get_coords_by_yourCity(get_cityName()),get_weather_by_coords(lat, lon, yesSeriesDays, pastDay=input("how past day? 1 2"))))
+#print(get_sunsetSunrise_by_city(get_coords_by_yourCity(get_cityName()), last(lat, lon)))
+
+
