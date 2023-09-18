@@ -1,0 +1,256 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+new file mode 100644
+--- /dev/null	(date 1694343033440)
++++ b/main.py	(date 1694343033440)
+@@ -0,0 +1,16 @@
++# This is a sample Python script.
++
++# Press ⌃R to execute it or replace it with your code.
++# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
++
++
++def print_hi(name):
++    # Use a breakpoint in the code line below to debug your script.
++    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
++
++
++# Press the green button in the gutter to run the script.
++if __name__ == '__main__':
++    print_hi('PyCharm')
++
++# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+Index: .idea/GetWeather.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/GetWeather.iml b/.idea/GetWeather.iml
+new file mode 100644
+--- /dev/null	(date 1694343023733)
++++ b/.idea/GetWeather.iml	(date 1694343023733)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="PYTHON_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$" />
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+--- /dev/null	(date 1694343023777)
++++ b/.idea/modules.xml	(date 1694343023777)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/GetWeather.iml" filepath="$PROJECT_DIR$/.idea/GetWeather.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: lesson1.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lesson1.py b/lesson1.py
+new file mode 100644
+--- /dev/null	(date 1694439078753)
++++ b/lesson1.py	(date 1694439078753)
+@@ -0,0 +1,120 @@
++import requests
++import datetime
++
++# url api с параметрами
++urlWeather = "https://api.open-meteo.com/v1/forecast?"
++urlGeocoding = "https://geocoding-api.open-meteo.com/v1/search?name="
++
++yesSeriesDays = 1
++startDate = datetime.date.today()
++endDate = startDate
++
++while True:
++    # точка входа
++    what = input("""\nВыберите вариант:
++    Найти координаты вашего города? Введите 1
++    Найти погоду по координатам города? Введите 2
++    Найти погоду по названию города? Введите 3
++    Найти погоду за вчера, указав город? Введите 4
++    Найти когда восход и заход солнца в городе? Введите 5
++    Выйти из программы? Введите 0""")
++
++    if what == "1":
++        city = input("Введите город на англ., Пример: Moscow, Berlin")
++            # url api с параметрами
++        resUrlGeocoding = urlGeocoding+city
++            # запрашиваем ответ в JSON
++        Geocoding = requests.get(resUrlGeocoding).json()
++            # из JSON получаем Широту и Долготу
++        valueLatitude = Geocoding["results"][0]["latitude"]
++        valueLongitude = Geocoding["results"][0]["longitude"]
++        print("\nКоординаты вашего города\n", "Широта: ", valueLatitude, "\nДолгота: ", valueLongitude)
++
++    if what == "2":
++        valueLatitude = input("Введите широту: ")
++        valueLongitude = input("Введите долготу: ")
++        yesSeriesDays = input("\nЗа сколько дней вывести погоду? Введите от 1 до 16")
++        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + f"&forecast_days={yesSeriesDays}"
++        reqWeatherYourCity = requests.get(weatherYourCity).json()
++        # из JSON получаем Дату и Температуру
++        dataYourCity = reqWeatherYourCity["hourly"]["time"]
++        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
++        # формируем красивый вывод погоды на сегодня
++        compilationDataTemp = []
++        for d, t in zip(dataYourCity, tempYourCity):
++            res = (str(d) + " - " + str(t) + " °C")
++            compilationDataTemp.append(res)
++        print("\nПогода по заданным координатам:\n", *compilationDataTemp, sep="\n")
++
++    if what == "3":
++        city = input("Введите город на англ., Пример: Moscow, Berlin")
++        # url api с параметрами
++        resUrlGeocoding = urlGeocoding + city
++        # запрашиваем ответ в JSON
++        Geocoding = requests.get(resUrlGeocoding).json()
++        # из JSON получаем Широту и Долготу
++        valueLatitude = Geocoding["results"][0]["latitude"]
++        valueLongitude = Geocoding["results"][0]["longitude"]
++        yesSeriesDays = input("\nЗа сколько дней вывести погоду? Введите от 1 до 16")
++        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + f"&forecast_days={yesSeriesDays}"
++        reqWeatherYourCity = requests.get(weatherYourCity).json()
++        # из JSON получаем Дату и Температуру
++        dataYourCity = reqWeatherYourCity["hourly"]["time"]
++        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
++        # формируем красивый вывод погоды на сегодня
++        compilationDataTemp = []
++        for d, t in zip(dataYourCity, tempYourCity):
++            res = (str(d) + " - " + str(t) + " °C")
++            compilationDataTemp.append(res)
++        print("\nПогода в вашем городе:\n", *compilationDataTemp, sep="\n")
++
++    if what == "4":
++        city = input("Введите город на англ., Пример: Moscow, Berlin")
++        # url api с параметрами
++        resUrlGeocoding = urlGeocoding + city
++        # запрашиваем ответ в JSON
++        Geocoding = requests.get(resUrlGeocoding).json()
++        # из JSON получаем Широту и Долготу
++        valueLatitude = Geocoding["results"][0]["latitude"]
++        valueLongitude = Geocoding["results"][0]["longitude"]
++
++        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&hourly=temperature_2m" + "&past_days=1" + "&forecast_days=0"
++        reqWeatherYourCity = requests.get(weatherYourCity).json()
++        print(reqWeatherYourCity)
++        # из JSON получаем Дату и Температуру
++        dataYourCity = reqWeatherYourCity["hourly"]["time"]
++        tempYourCity = reqWeatherYourCity["hourly"]["temperature_2m"]
++        # формируем красивый вывод погоды на сегодня
++        compilationDataTemp = []
++        for d, t in zip(dataYourCity, tempYourCity):
++            res = (str(d) + " - " + str(t) + " °C")
++            compilationDataTemp.append(res)
++        print("\nВчера было :\n", *compilationDataTemp, sep="\n")
++
++    if what == "5":
++        city = input("Введите город на англ., Пример: Moscow, Berlin")
++        chooseDay = input("На сегодня узнать или на другую дату? Введите Сегодня или Другая")
++        if chooseDay == "Сегодня":
++            pass
++        else:
++            startDate = input("Укажите желаемую дату. Введите в формете YYYY-MM-DD")
++            endDate = startDate
++        # url api с параметрами
++        resUrlGeocoding = urlGeocoding + city
++        # запрашиваем ответ в JSON
++        Geocoding = requests.get(resUrlGeocoding).json()
++        # из JSON получаем Широту и Долготу
++        valueLatitude = Geocoding["results"][0]["latitude"]
++        valueLongitude = Geocoding["results"][0]["longitude"]
++        weatherYourCity = urlWeather + f"latitude={valueLatitude}" + "&" + f"longitude={valueLongitude}" + "&daily=sunset,sunrise" + "&forecast_days=0" +"&timezone=auto" + f"&start_date={startDate}" + f"&end_date={endDate}"
++        reqWeatherYourCity = requests.get(weatherYourCity).json()
++        valueSunset = reqWeatherYourCity["daily"]["sunset"]
++        valueSunrise = reqWeatherYourCity["daily"]["sunrise"]
++
++        for a in valueSunset:
++            print(f"Заход в вашем городе, в это время - {a[-4:]}")
++        for b in valueSunrise:
++            print(f"Восход в вашем городе, в это время - {b[-4:]}")
++
++    if what == "0":
++        break
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+--- /dev/null	(date 1694343023859)
++++ b/.idea/vcs.xml	(date 1694343023859)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+--- /dev/null	(date 1694343023870)
++++ b/.idea/misc.xml	(date 1694343023870)
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9" project-jdk-type="Python SDK" />
++</project>
+\ No newline at end of file
+Index: .idea/inspectionProfiles/profiles_settings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/inspectionProfiles/profiles_settings.xml b/.idea/inspectionProfiles/profiles_settings.xml
+new file mode 100644
+--- /dev/null	(date 1694343023896)
++++ b/.idea/inspectionProfiles/profiles_settings.xml	(date 1694343023896)
+@@ -0,0 +1,6 @@
++<component name="InspectionProjectProfileManager">
++  <settings>
++    <option name="USE_PROJECT_PROFILE" value="false" />
++    <version value="1.0" />
++  </settings>
++</component>
+\ No newline at end of file
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	(date 1694343026719)
++++ b/.idea/.gitignore	(date 1694343026719)
+@@ -0,0 +1,3 @@
++# Default ignored files
++/shelf/
++/workspace.xml
