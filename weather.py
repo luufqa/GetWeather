@@ -35,6 +35,12 @@ def sunsetSunrise(suns: str, sunr: str) -> str:
 
 
 def get_cityName(city: str) -> str:
+    """This function adds one to the given number.
+
+        :param city: The name to use
+        :type str: str
+
+        """
     return city
 
 
