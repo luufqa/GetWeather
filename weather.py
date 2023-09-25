@@ -75,10 +75,9 @@ def sunset_sunrise_by_city(youcity: str, date: str, next_days=0) -> Tuple[str, s
     Geocoding = requests.get(URL_GEOCODING + youcity).json()
     lat = Geocoding["results"][0]["latitude"]
     lon = Geocoding["results"][0]["longitude"]
-    startDate = ""
-    endDate = ""
-    s = dt.now().strftime("%Y-%M-%D")
-    if date == s:
+    startDate = dt.now().strftime("%Y-%M-%D")
+    endDate = startDate
+    if date == startDate:
         pass
     else:
         startDate = date
@@ -122,5 +121,5 @@ def get_weather_past_days_by_city_name(youcity: str, past_days=0):
 # print(get_coords_by_your_city(get_city_name("Berlin")))
 # print(get_weather_by_coords(55.75222, 37.61556, next_days=2))
 # print(get_weather_by_city_name("Berlin", next_days=2))
-# print(get_weather_past_days_by_city_name("Moscow", past_days=2))
-# print(sunset_sunrise_by_city("newyork", "2023-09-30"))
+# print(get_weather_past_days_by_city_name("Moscow", past_days=5))
+# print(sunset_sunrise_by_city("moscow", "2023-09-10"))
