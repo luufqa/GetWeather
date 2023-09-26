@@ -1,10 +1,9 @@
-from datetime import datetime as dt
 import requests
 from typing import List, Tuple
 
 # url api с параметрами
 URL_WEATHER = "https://api.open-meteo.com/v1/forecast?"
-URL_GEOCODING = "https://geocoding-api.open-meteo.com/v1/search?name="
+URL_GEOCODING = "https://geocoding-api.open-meteo.com/v1/search?"
 
 
 def get_city_name(city: str) -> str:
@@ -34,25 +33,31 @@ def get_coords_by_your_city(youcity: str) -> Tuple[float, float]:
     :param youcity: The name to use
     :return: coords lat and lon
     """
+    params = {'name': youcity}
 
-    Geocoding = requests.get(URL_GEOCODING + youcity).json()
+    Geocoding = requests.get(URL_GEOCODING, params=params).json()
 
     lat = Geocoding["results"][0]["latitude"]
     lon = Geocoding["results"][0]["longitude"]
     return lat, lon
 
 
-def get_weather_by_coords(lat: float, lon: float, next_days=1, past_days=0) -> List[str]:
+def get_weather_by_coords(lat: float, lon: float, next_days=None, past_days=None) -> List[str]:
     """This function return weather by coords. Default weather for today (first day)
     :param lat: coords city - latitude
     :param lon: coords city - longitude
-    :param next_days: how many days
-    :param past_days: previous days
+    :param next_days: you can get weather on the 1-7 next days, if add argument "next_days=2"
+    :param past_days: you can get weather on the 1-2 past days, if add argument "past_days=1"
     :return: return weather by coords
     """
-    weatherYourCity = URL_WEATHER + f"latitude={lat}" + "&" + f"longitude={lon}" + "&hourly=temperature_2m" \
-                      + f"&forecast_days={next_days}" + f"&past_days={past_days}"
-    reqWeatherYourCity = requests.get(weatherYourCity).json()
+
+    if next_days is None:
+        next_days = 1
+    if None != past_days:
+        next_days = 0
+    paramsWea = {'latitude': lat, 'longitude': lon, 'hourly': 'temperature_2m', 'forecast_days': next_days,
+                 'past_days': past_days}
+    reqWeatherYourCity = requests.get(URL_WEATHER, params=paramsWea).json()
 
     dataTemp = reqWeatherYourCity["hourly"]["time"]
     tempCity = reqWeatherYourCity["hourly"]["temperature_2m"]
@@ -72,54 +77,60 @@ def sunset_sunrise_by_city(youcity: str, date: str, next_days=0) -> Tuple[str, s
     :param next_days: how many days
     :return: return weather by coords
     """
-    Geocoding = requests.get(URL_GEOCODING + youcity).json()
+    paramsGeo = {'name': youcity}
+    Geocoding = requests.get(URL_GEOCODING, params=paramsGeo).json()
     lat = Geocoding["results"][0]["latitude"]
     lon = Geocoding["results"][0]["longitude"]
-    startDate = dt.now().strftime("%Y-%M-%D")
+    startDate = date
     endDate = startDate
-    if date == startDate:
-        pass
-    else:
-        startDate = date
-        endDate = startDate
 
-    weatherYourCity = URL_WEATHER + f"latitude={lat}" + "&" + f"longitude={lon}" + f"&forecast_days={next_days}" \
-                      + f"&daily=sunset,sunrise" + f"&timezone=auto" + f"&start_date={startDate}" \
-                      + f"&end_date={endDate}"
-    reqWeatherYourCity = requests.get(weatherYourCity).json()
+    paramsWea = {'latitude': lat, 'longitude': lon, 'daily': 'sunset,sunrise', 'forecast_days': next_days,
+                 'timezone': 'auto', 'start_date': startDate, 'end_date': endDate}
+    reqWeatherYourCity = requests.get(URL_WEATHER, params=paramsWea).json()
 
     suns = reqWeatherYourCity["daily"]["sunset"]
     sunr = reqWeatherYourCity["daily"]["sunrise"]
+
     return get_sunset_sunrise(suns, sunr)
 
 
-def get_weather_by_city_name(youcity: str, next_days=0):
-    """Function return weather on the next two days or another by your city name
+def get_weather_by_city_name(youcity: str, next_days=None):
+    """Function return weather on the today. If you add "next_days=2" - can see more days
     :param youcity: Start index, give city name in str
     :param next_days: Second index, give number for next day
-    :return: List with weather on the two days or another by your city name
+    :return: List with weather on the today or more days - if you add "next_days=2" or "next_days=3"
     """
-    Geocoding = requests.get(URL_GEOCODING + youcity).json()
+    paramsGeo = {'name': youcity}
+    Geocoding = requests.get(URL_GEOCODING, params=paramsGeo).json()
+
     lat = Geocoding["results"][0]["latitude"]
     lon = Geocoding["results"][0]["longitude"]
     return get_weather_by_coords(lat, lon, next_days)
 
 
-def get_weather_past_days_by_city_name(youcity: str, past_days=0):
-    """Function return weather on the one past_days or another past_days, by your city name
+def get_weather_past_days_by_city_name(youcity: str, past_days=None):
+    """Function return weather on the today. If you add "past_days=1" - can see previous days
     :param youcity: Start index, give city name in str
     :param past_days: Second index, give number for next past day
-    :return: List with weather on the two days or another by your city name
+    :return: List with weather on the today. You can see previous days - if you add "past_days=1" or "past_days=2"
     """
+    next_days: None = None
 
-    Geocoding = requests.get(URL_GEOCODING + youcity).json()
+    paramsGeo = {'name': youcity}
+    Geocoding = requests.get(URL_GEOCODING, params=paramsGeo).json()
+
     lat = Geocoding["results"][0]["latitude"]
     lon = Geocoding["results"][0]["longitude"]
-    return get_weather_by_coords(lat, lon, past_days)
 
-# print(get_city_name("Moscow"))
-# print(get_coords_by_your_city(get_city_name("Berlin")))
-# print(get_weather_by_coords(55.75222, 37.61556, next_days=2))
-# print(get_weather_by_city_name("Berlin", next_days=2))
-# print(get_weather_past_days_by_city_name("Moscow", past_days=5))
-# print(sunset_sunrise_by_city("moscow", "2023-09-10"))
+    return get_weather_by_coords(lat, lon, next_days, past_days)
+
+
+print(get_city_name("Moscow"))
+print(get_coords_by_your_city(get_city_name("Berlin")))
+print(get_weather_by_coords(55.75222, 37.61556))  # default "next_days=1", for one day. You can add
+# argument "next_days=2" and you see two days
+print(get_weather_by_city_name("Berlin"))  # default "next_days=1", for one day.
+# You can add argument "next_days=2"
+print(get_weather_past_days_by_city_name("Moscow", past_days=1))  # default "past_days=0", for one past day. You can add
+# argument "past_days=1"
+print(sunset_sunrise_by_city("moscow", "2023-09-10"))
