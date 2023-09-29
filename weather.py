@@ -2,8 +2,8 @@ import requests
 from typing import List, Tuple
 
 # url api с параметрами
-URL_WEATHER = "https://api.open-meteo.com/v1/forecast?"
-URL_GEOCODING = "https://geocoding-api.open-meteo.com/v1/search?"
+URL_WEATHER = "https://api.open-meteo.com/v1/forecast"
+URL_GEOCODING = "https://geocoding-api.open-meteo.com/v1/search"
 
 
 def get_city_name(city: str) -> str:
@@ -55,7 +55,10 @@ def get_weather_by_coords(lat: float, lon: float, next_days=None, past_days=None
         next_days = 1
     if None != past_days:
         next_days = 0
-    paramsWea = {'latitude': lat, 'longitude': lon, 'hourly': 'temperature_2m', 'forecast_days': next_days,
+    paramsWea = {'latitude': lat,
+                 'longitude': lon,
+                 'hourly': 'temperature_2m',
+                 'forecast_days': next_days,
                  'past_days': past_days}
     reqWeatherYourCity = requests.get(URL_WEATHER, params=paramsWea).json()
 
@@ -84,8 +87,13 @@ def sunset_sunrise_by_city(youcity: str, date: str, next_days=0) -> Tuple[str, s
     startDate = date
     endDate = startDate
 
-    paramsWea = {'latitude': lat, 'longitude': lon, 'daily': 'sunset,sunrise', 'forecast_days': next_days,
-                 'timezone': 'auto', 'start_date': startDate, 'end_date': endDate}
+    paramsWea = {'latitude': lat,
+                 'longitude': lon,
+                 'daily': 'sunset,sunrise',
+                 'forecast_days': next_days,
+                 'timezone': 'auto',
+                 'start_date': startDate,
+                 'end_date': endDate}
     reqWeatherYourCity = requests.get(URL_WEATHER, params=paramsWea).json()
 
     suns = reqWeatherYourCity["daily"]["sunset"]
