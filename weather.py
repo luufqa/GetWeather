@@ -1,5 +1,6 @@
 import requests
 from typing import List, Tuple
+import pytest
 
 # url api с параметрами
 URL_WEATHER = "https://api.open-meteo.com/v1/forecast"
@@ -133,12 +134,12 @@ def get_weather_past_days_by_city_name(youcity: str, past_days=None):
     return get_weather_by_coords(lat, lon, next_days, past_days)
 
 
-print(get_city_name("Moscow"))
-print(get_coords_by_your_city(get_city_name("Berlin")))
-print(get_weather_by_coords(55.75222, 37.61556))  # default "next_days=1", for one day. You can add
+#print(get_city_name("Moscow"))
+#print(get_coords_by_your_city(get_city_name("Berlin")))
+#print(get_weather_by_coords(55.75222, 37.61556))  # default "next_days=1", for one day. You can add
 # argument "next_days=2" and you see two days
-print(get_weather_by_city_name("Berlin"))  # default "next_days=1", for one day.
+#print(get_weather_by_city_name("Berlin"))  # default "next_days=1", for one day.
 # You can add argument "next_days=2"
-print(get_weather_past_days_by_city_name("Moscow", past_days=1))  # default "past_days=0", for one past day. You can add
+print(get_weather_past_days_by_city_name("Moscow", past_days=2))  # default "past_days=0", for one past day. You can add
 # argument "past_days=1"
 print(sunset_sunrise_by_city("moscow", "2023-09-10"))
